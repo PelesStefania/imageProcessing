@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "+wcpaWb9jSA=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\Algorithms\\Algorithms.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\teod4\\.nuget\\packages\\emgucv\\3.1.0.1\\emgucv.3.1.0.1.nupkg.sha512",
+    "C:\\Users\\teod4\\.nuget\\packages\\opentk\\1.1.2225\\opentk.1.1.2225.nupkg.sha512",
+    "C:\\Users\\teod4\\.nuget\\packages\\opentk.glcontrol\\1.1.2225\\opentk.glcontrol.1.1.2225.nupkg.sha512",
+    "C:\\Users\\teod4\\.nuget\\packages\\zedgraph\\5.1.5\\zedgraph.5.1.5.nupkg.sha512"
+  ],
+  "logs": []
+}
