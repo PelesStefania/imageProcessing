@@ -1,6 +1,7 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
 
+using Microsoft.Win32;
 using System.Windows;
 using System.Diagnostics;
 using System.Drawing.Imaging;
@@ -20,6 +21,9 @@ using Algorithms.Tools;
 using Algorithms.Utilities;
 using Framework.Utilities;
 using System;
+using MatFileHandler;
+using System.Linq;
+
 
 
 namespace Framework.ViewModel
@@ -78,26 +82,7 @@ namespace Framework.ViewModel
         }
         #endregion
 
-        #region Load Multispectral Image
 
-        private RelayCommand _loadMultispectralImageCommand;
-        public RelayCommand LoadMultispectralImageCommand
-        {
-            get
-            {
-                if (_loadMultispectralImageCommand == null)
-                    _loadMultispectralImageCommand = new RelayCommand(LoadMultispectralImage);
-                return _loadMultispectralImageCommand;
-            }
-        }
-        private void LoadMultispectralImage(object parameter)
-        {
-            Clear(parameter);
-            string fileName = LoadFileDialog("Select a multispectram picture");
-
-        }
-
-        #endregion
 
         #region Load color image
         private ICommand _loadColorImageCommand;
@@ -958,6 +943,154 @@ namespace Framework.ViewModel
 
             ClearProcessedCanvas(canvases[1] as Canvas);
         }
+        #endregion
+
+        #region Load Multispectral Image
+
+        private RelayCommand _loadMultispectralImageCommand;
+        public RelayCommand LoadMultispectralImageCommand
+        {
+            get
+            {
+                if (_loadMultispectralImageCommand == null)
+                    _loadMultispectralImageCommand = new RelayCommand(LoadMultispectralImage);
+                return _loadMultispectralImageCommand;
+            }
+        }
+        private void LoadMultispectralImage(object parameter)
+        {
+            Clear(parameter);
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Title = "Select a multispectral image",
+                Filter = "MAT Files|*.mat"
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string fileName = openFileDialog.FileName;
+                IMatFile matFile;
+                using (var fileStream = new System.IO.FileStream(fileName, System.IO.FileMode.Open))
+                {
+                    var reader = new MatFileReader(fileStream);
+                    matFile = reader.Read();
+                }
+
+                IVariable imageVariable = matFile["paviaU"];
+                IArray imageData = imageVariable.Value;
+                int height = imageData.Dimensions[0];
+                int width = imageData.Dimensions[1];
+                int bands = imageData.Dimensions[2];
+
+                double[] rawPixelValues = imageData.ConvertToDoubleArray();
+
+                double minVal = rawPixelValues.Min();
+                double maxVal = rawPixelValues.Max();
+                double scale = 255.0 / (maxVal - minVal);
+                byte[] normalizedPixels = rawPixelValues.Select(v => (byte)((v - minVal) * scale)).ToArray();
+
+
+                int bBand, gBand, rBand;
+
+                List<string> labels = new List<string> {
+                        "Enter blue band: ",
+                        "Enter green band: ",
+                        "Enter red band: ",
+                    };
+                DialogWindow window = new DialogWindow(_mainVM, labels);
+                window.ShowDialog();
+                List<double> values = window.GetValues();
+                if (values.Count < 3)
+                {
+                    MessageBox.Show("Invalid input values!");
+                    return;
+                }
+                bBand = (int)values[0];
+                gBand = (int)values[1];
+                rBand = (int)values[2];
+
+                if (bBand < 0 || bBand >=bands)
+                {
+                    MessageBox.Show("The first value does not match!");
+                    return;
+                }
+                if (gBand < 0 || gBand >=bands)
+                {
+                    MessageBox.Show("The second value does not match!");
+                    return;
+                }
+                if (rBand < 0 || rBand >=bands)
+                {
+                    MessageBox.Show("The third value does not match!");
+                    return;
+                }
+
+
+                Image<Bgr, byte> multispectralImage = ProcessMatImage(normalizedPixels, width, height, bBand, gBand, rBand);
+                ColorInitialImage = multispectralImage;
+                InitialImage = Convert(ColorInitialImage);
+                Image<Bgr, byte> gammaCorrectedImage = GammaOperator(multispectralImage, 0.5, 0.5, 0.5);
+                ColorProcessedImage = gammaCorrectedImage;
+                ProcessedImage = Convert(ColorProcessedImage);
+            }
+
+        }
+
+        public static Image<Bgr, byte> ProcessMatImage(byte[] pixelValues, int width, int height, int bandB, int bandG, int bandR)
+        {
+            var blueBand = ExtractBand(pixelValues, width, height, bandB);
+            var greenBand = ExtractBand(pixelValues, width, height, bandG);
+            var redBand = ExtractBand(pixelValues, width, height, bandR);
+
+            Image<Bgr, byte> multispectralImage = new Image<Bgr, byte>(width, height);
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    multispectralImage.Data[y, x, 0] = blueBand.Data[y, x, 0];
+                    multispectralImage.Data[y, x, 1] = greenBand.Data[y, x, 0];
+                    multispectralImage.Data[y, x, 2] = redBand.Data[y, x, 0];
+                }
+            }
+
+            return multispectralImage;
+        }
+
+        public static Image<Gray, byte> ExtractBand(byte[] pixelValues, int width, int height, int bandIndex)
+        {
+            Image<Gray, byte> bandImage = new Image<Gray, byte>(width, height);
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int index = y + x * height + bandIndex * width * height;
+                    bandImage.Data[y, x, 0] = pixelValues[index];
+                }
+            }
+
+            return bandImage;
+        }
+        public static Image<Bgr, byte> GammaOperator(Image<Bgr, byte> inputImage, double gammaB, double gammaG, double gammaR)
+        {
+            Image<Bgr, byte> outputImage = inputImage.CopyBlank();
+
+            for (int y = 0; y < inputImage.Height; y++)
+            {
+                for (int x = 0; x < inputImage.Width; x++)
+                {
+                    var pixel = inputImage[y, x];
+
+                    byte B = (byte)(255 * Math.Pow(pixel.Blue / 255.0, gammaB));
+                    byte G = (byte)(255 * Math.Pow(pixel.Green / 255.0, gammaG));
+                    byte R = (byte)(255 * Math.Pow(pixel.Red / 255.0, gammaR));
+
+                    outputImage[y, x] = new Bgr(B, G, R);
+                }
+            }
+
+            return outputImage;
+        }
+
         #endregion
     }
 }

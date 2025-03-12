@@ -21,6 +21,9 @@ namespace Algorithms.Tools
         }
         #endregion
 
+        #region Multispectral Image
+        #endregion
+
         #region Invert
         public static Image<Gray, byte> Invert(Image<Gray, byte> inputImage)
         {

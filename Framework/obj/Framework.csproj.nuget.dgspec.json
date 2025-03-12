@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\Framework\\Framework.csproj": {}
+    "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\IMProcessing\\Framework\\Framework.csproj": {}
   },
   "projects": {
-    "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\Algorithms\\Algorithms.csproj": {
+    "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\IMProcessing\\Algorithms\\Algorithms.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\Algorithms\\Algorithms.csproj",
+        "projectUniqueName": "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\IMProcessing\\Algorithms\\Algorithms.csproj",
         "projectName": "Algorithms",
-        "projectPath": "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\Algorithms\\Algorithms.csproj",
+        "projectPath": "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\IMProcessing\\Algorithms\\Algorithms.csproj",
         "packagesPath": "C:\\Users\\teod4\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\Algorithms\\obj\\",
+        "outputPath": "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\IMProcessing\\Algorithms\\obj\\",
         "projectStyle": "PackageReference",
         "skipContentFileWrite": true,
         "fallbackFolders": [
@@ -46,6 +46,10 @@
             "EmguCV": {
               "target": "Package",
               "version": "[3.1.0.1, )"
+            },
+            "MatFileHandler": {
+              "target": "Package",
+              "version": "[1.3.0, )"
             }
           }
         }
@@ -65,14 +69,14 @@
         }
       }
     },
-    "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\Framework\\Framework.csproj": {
+    "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\IMProcessing\\Framework\\Framework.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\Framework\\Framework.csproj",
+        "projectUniqueName": "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\IMProcessing\\Framework\\Framework.csproj",
         "projectName": "Framework",
-        "projectPath": "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\Framework\\Framework.csproj",
+        "projectPath": "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\IMProcessing\\Framework\\Framework.csproj",
         "packagesPath": "C:\\Users\\teod4\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\Framework\\obj\\",
+        "outputPath": "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\IMProcessing\\Framework\\obj\\",
         "projectStyle": "PackageReference",
         "skipContentFileWrite": true,
         "fallbackFolders": [
@@ -93,8 +97,8 @@
         "frameworks": {
           "net48": {
             "projectReferences": {
-              "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\Algorithms\\Algorithms.csproj": {
-                "projectPath": "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\Algorithms\\Algorithms.csproj"
+              "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\IMProcessing\\Algorithms\\Algorithms.csproj": {
+                "projectPath": "C:\\Users\\teod4\\OneDrive\\Desktop\\An2\\sem2\\PID\\IMProcessing\\Algorithms\\Algorithms.csproj"
               }
             }
           }
@@ -111,6 +115,10 @@
             "EmguCV": {
               "target": "Package",
               "version": "[3.1.0.1, )"
+            },
+            "MatFileHandler": {
+              "target": "Package",
+              "version": "[1.3.0, )"
             },
             "OpenTK.GLControl": {
               "target": "Package",

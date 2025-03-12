@@ -65,16 +65,7 @@
                         </MultiBinding>
                     </MenuItem.CommandParameter>
                 </MenuItem>
-                <MenuItem Header="Load multispectral image"
-                     Foreground="#1E1E1E"
-                     Command="{Binding Path=MenuCommands.LoadGrayscaleImageCommand}">
-                    <MenuItem.CommandParameter>
-                        <MultiBinding Converter="{StaticResource arrayMultiValueConverter}">
-                            <Binding ElementName="initialImageCanvas"/>
-                            <Binding ElementName="processedImageCanvas"/>
-                        </MultiBinding>
-                    </MenuItem.CommandParameter>
-                </MenuItem>
+                
                 <Separator/>
                 <MenuItem Header="Save processed image"
                           Foreground="#1E1E1E"
@@ -84,6 +75,21 @@
                           Foreground="#1E1E1E"
                           Command="{Binding Path=MenuCommands.ExitCommand}"/>
             </MenuItem>
+
+            <MenuItem Header="Multispectral Visualization">
+                <MenuItem Header="Load Multispectral image" 
+                    Foreground="#1E1E1E"
+                    Command="{Binding Path=MenuCommands.LoadMultispectralImageCommand}">
+                    <MenuItem.CommandParameter>
+                        <MultiBinding Converter="{StaticResource arrayMultiValueConverter}">
+                            <Binding ElementName="initialImageCanvas"/>
+                            <Binding ElementName="processedImageCanvas"/>
+                        </MultiBinding>
+                    </MenuItem.CommandParameter>
+                </MenuItem>
+                
+            </MenuItem>
+           
 
             <MenuItem Header="Edit"
                       Background="{Binding Path=Theme.MenuItemBackgroundColor}"
@@ -206,6 +212,8 @@
 
 
             </MenuItem>
+
+           
 
             <MenuItem Header="Pointwise operations"
                       Background="{Binding Path=Theme.MenuItemBackgroundColor}"
