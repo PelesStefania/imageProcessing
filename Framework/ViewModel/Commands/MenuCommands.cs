@@ -1004,9 +1004,9 @@ namespace Framework.ViewModel
                     MessageBox.Show("Invalid input values!");
                     return;
                 }
-                bBand = (int)values[0];
-                gBand = (int)values[1];
-                rBand = (int)values[2];
+                bBand = 13;//(int)values[0];
+                gBand = 38;//(int)values[1];
+                rBand = 63;//(int)values[2];
 
                 if (bBand < 0 || bBand >=bands)
                 {
@@ -1028,9 +1028,7 @@ namespace Framework.ViewModel
                 Image<Bgr, byte> multispectralImage = ProcessMatImage(normalizedPixels, width, height, bBand, gBand, rBand);
                 ColorInitialImage = multispectralImage;
                 InitialImage = Convert(ColorInitialImage);
-                Image<Bgr, byte> gammaCorrectedImage = GammaOperator(multispectralImage, 0.5, 0.5, 0.5);
-                ColorProcessedImage = gammaCorrectedImage;
-                ProcessedImage = Convert(ColorProcessedImage);
+               
             }
 
         }
@@ -1070,27 +1068,79 @@ namespace Framework.ViewModel
 
             return bandImage;
         }
-        public static Image<Bgr, byte> GammaOperator(Image<Bgr, byte> inputImage, double gammaB, double gammaG, double gammaR)
+      
+        #endregion
+
+
+
+        #region Apply Gamma
+
+        private RelayCommand _applyGammaCommand;
+        public RelayCommand ApplyGammaCommand
         {
-            Image<Bgr, byte> outputImage = inputImage.CopyBlank();
-
-            for (int y = 0; y < inputImage.Height; y++)
+            get
             {
-                for (int x = 0; x < inputImage.Width; x++)
+                if (_applyGammaCommand == null)
+                    _applyGammaCommand = new RelayCommand(ApplyGammaOperator);
+                return _applyGammaCommand;
+            }
+        }
+        private void ApplyGammaOperator(object parameter)
+        {
+
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+            ClearProcessedCanvas(parameter);
+            double gamma;
+            List<string> labels = new List<string> {
+                        "Enter gamma: ",
+                    };
+            DialogWindow window = new DialogWindow(_mainVM, labels);
+            window.ShowDialog();
+            List<double> values = window.GetValues();
+            if (values.Count < 1)
+            {
+                MessageBox.Show("Invalid input values!");
+                return;
+            }
+            gamma = values[0];
+            if (ColorInitialImage != null)
+            {
+
+                Image<Bgr, byte> outputImage = ColorInitialImage.CopyBlank();
+
+                for (int y = 0; y < ColorInitialImage.Height; y++)
                 {
-                    var pixel = inputImage[y, x];
+                    for (int x = 0; x < ColorInitialImage.Width; x++)
+                    {
+                        var pixel = ColorInitialImage[y, x];
 
-                    byte B = (byte)(255 * Math.Pow(pixel.Blue / 255.0, gammaB));
-                    byte G = (byte)(255 * Math.Pow(pixel.Green / 255.0, gammaG));
-                    byte R = (byte)(255 * Math.Pow(pixel.Red / 255.0, gammaR));
+                        byte B = (byte)(255 * Math.Pow(pixel.Blue / 255.0, gamma));
+                        byte G = (byte)(255 * Math.Pow(pixel.Green / 255.0, gamma));
+                        byte R = (byte)(255 * Math.Pow(pixel.Red / 255.0, gamma));
 
-                    outputImage[y, x] = new Bgr(B, G, R);
+                        outputImage[y, x] = new Bgr(B, G, R);
+                    }
                 }
+
+                ColorProcessedImage = outputImage;
+                ProcessedImage = Convert(ColorProcessedImage);
+            }
+            else
+            {
+                MessageBox.Show("Only color images can be modified!");
+                return;
             }
 
-            return outputImage;
+            
+
         }
 
         #endregion
+
+
     }
 }

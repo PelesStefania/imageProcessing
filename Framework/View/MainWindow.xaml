@@ -76,7 +76,8 @@
                           Command="{Binding Path=MenuCommands.ExitCommand}"/>
             </MenuItem>
 
-            <MenuItem Header="Multispectral Visualization">
+            <MenuItem Header="Multispectral Visualization" Background="{Binding Path=Theme.MenuItemBackgroundColor}"
+Foreground="{Binding Path=Theme.MenuItemForegroundColor}">
                 <MenuItem Header="Load Multispectral image" 
                     Foreground="#1E1E1E"
                     Command="{Binding Path=MenuCommands.LoadMultispectralImageCommand}">
@@ -87,7 +88,11 @@
                         </MultiBinding>
                     </MenuItem.CommandParameter>
                 </MenuItem>
-                
+                <MenuItem Header="Apply Gamma operator"
+                          Foreground="#1E1E1E"
+                          Command="{Binding Path=MenuCommands.ApplyGammaCommand}"
+                          CommandParameter="{Binding ElementName=processedImageCanvas}"/>
+
             </MenuItem>
            
 
