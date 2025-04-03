@@ -23,6 +23,8 @@ using Framework.Utilities;
 using System;
 using MatFileHandler;
 using System.Linq;
+using System.Windows.Media.Imaging;
+//using System.Drawing;
 
 
 
@@ -780,6 +782,7 @@ namespace Framework.ViewModel
 
 
         #endregion
+
         #region Mirror Image
         private ICommand _mirrorImageCommand;
         public ICommand MirrorImageCommand{
@@ -889,61 +892,6 @@ namespace Framework.ViewModel
         #endregion
 
         #region Pointwise operations
-        #endregion
-
-        #region Thresholding
-        #endregion
-
-        #region Filters
-        #endregion
-
-        #region Morphological operations
-        #endregion
-
-        #region Geometric transformations
-        #endregion
-
-        #region Segmentation
-        #endregion
-
-        #region Use processed image as initial image
-        private ICommand _useProcessedImageAsInitialImageCommand;
-        public ICommand UseProcessedImageAsInitialImageCommand
-        {
-            get
-            {
-                if (_useProcessedImageAsInitialImageCommand == null)
-                    _useProcessedImageAsInitialImageCommand = new RelayCommand(UseProcessedImageAsInitialImage);
-                return _useProcessedImageAsInitialImageCommand;
-            }
-        }
-
-        private void UseProcessedImageAsInitialImage(object parameter)
-        {
-            if (ProcessedImage == null)
-            {
-                MessageBox.Show("Please process an image first!");
-                return;
-            }
-
-            var canvases = (object[])parameter;
-
-            ClearInitialCanvas(canvases[0] as Canvas);
-
-            if (GrayProcessedImage != null)
-            {
-                GrayInitialImage = GrayProcessedImage;
-                InitialImage = Convert(GrayInitialImage);
-            }
-            else if (ColorProcessedImage != null)
-            {
-                ColorInitialImage = ColorProcessedImage;
-                InitialImage = Convert(ColorInitialImage);
-            }
-
-            ClearProcessedCanvas(canvases[1] as Canvas);
-        }
-        #endregion
 
         #region Load Multispectral Image
 
@@ -1008,70 +956,33 @@ namespace Framework.ViewModel
                 gBand = 38;//(int)values[1];
                 rBand = 63;//(int)values[2];
 
-                if (bBand < 0 || bBand >=bands)
+                if (bBand < 0 || bBand >= bands)
                 {
                     MessageBox.Show("The first value does not match!");
                     return;
                 }
-                if (gBand < 0 || gBand >=bands)
+                if (gBand < 0 || gBand >= bands)
                 {
                     MessageBox.Show("The second value does not match!");
                     return;
                 }
-                if (rBand < 0 || rBand >=bands)
+                if (rBand < 0 || rBand >= bands)
                 {
                     MessageBox.Show("The third value does not match!");
                     return;
                 }
 
 
-                Image<Bgr, byte> multispectralImage = ProcessMatImage(normalizedPixels, width, height, bBand, gBand, rBand);
+                Image<Bgr, byte> multispectralImage = PointwiseOperations.ProcessMatImage(normalizedPixels, width, height, bBand, gBand, rBand);
                 ColorInitialImage = multispectralImage;
                 InitialImage = Convert(ColorInitialImage);
-               
+
             }
 
         }
 
-        public static Image<Bgr, byte> ProcessMatImage(byte[] pixelValues, int width, int height, int bandB, int bandG, int bandR)
-        {
-            var blueBand = ExtractBand(pixelValues, width, height, bandB);
-            var greenBand = ExtractBand(pixelValues, width, height, bandG);
-            var redBand = ExtractBand(pixelValues, width, height, bandR);
 
-            Image<Bgr, byte> multispectralImage = new Image<Bgr, byte>(width, height);
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    multispectralImage.Data[y, x, 0] = blueBand.Data[y, x, 0];
-                    multispectralImage.Data[y, x, 1] = greenBand.Data[y, x, 0];
-                    multispectralImage.Data[y, x, 2] = redBand.Data[y, x, 0];
-                }
-            }
-
-            return multispectralImage;
-        }
-
-        public static Image<Gray, byte> ExtractBand(byte[] pixelValues, int width, int height, int bandIndex)
-        {
-            Image<Gray, byte> bandImage = new Image<Gray, byte>(width, height);
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    int index = y + x * height + bandIndex * width * height;
-                    bandImage.Data[y, x, 0] = pixelValues[index];
-                }
-            }
-
-            return bandImage;
-        }
-      
         #endregion
-
-
 
         #region Apply Gamma
 
@@ -1109,25 +1020,9 @@ namespace Framework.ViewModel
             gamma = values[0];
             if (ColorInitialImage != null)
             {
-
-                Image<Bgr, byte> outputImage = ColorInitialImage.CopyBlank();
-
-                for (int y = 0; y < ColorInitialImage.Height; y++)
-                {
-                    for (int x = 0; x < ColorInitialImage.Width; x++)
-                    {
-                        var pixel = ColorInitialImage[y, x];
-
-                        byte B = (byte)(255 * Math.Pow(pixel.Blue / 255.0, gamma));
-                        byte G = (byte)(255 * Math.Pow(pixel.Green / 255.0, gamma));
-                        byte R = (byte)(255 * Math.Pow(pixel.Red / 255.0, gamma));
-
-                        outputImage[y, x] = new Bgr(B, G, R);
-                    }
-                }
-
-                ColorProcessedImage = outputImage;
+                ColorProcessedImage = PointwiseOperations.ApplyGammaToColorImage(ColorInitialImage, gamma);
                 ProcessedImage = Convert(ColorProcessedImage);
+
             }
             else
             {
@@ -1135,12 +1030,127 @@ namespace Framework.ViewModel
                 return;
             }
 
-            
+
 
         }
 
+
         #endregion
 
+        #region Metoda Otsu
+        private RelayCommand _applyOtsuCommand;
+        public RelayCommand ApplyOtsuCommand
+        {
+            get
+            {
+                if (_applyOtsuCommand == null)
+                    _applyOtsuCommand = new RelayCommand(ApplyOtsuMethod);
+                return _applyOtsuCommand;
+            }
+        }
+
+        private void ApplyOtsuMethod(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+            ClearProcessedCanvas(parameter);
+
+            if (GrayInitialImage != null)
+            {
+
+                Image<Gray, byte> binaryImage = PointwiseOperations.ApplyOtsuThreshold(GrayInitialImage);
+
+                ProcessedImage = Convert(binaryImage);
+            }
+            else
+            {
+                MessageBox.Show("Only gray images can be modified!");
+                return;
+            }
+        }
+
+
+        #endregion
+
+        #region Filtru median
+        //private RelayCommand _applyMedianFiltre;
+        //public RelayCommand ApplyMedianFiltre
+        //{
+        //    get
+        //    {
+        //        if (_applyMedianFiltre == null)
+        //            _applyMedianFiltre = new RelayCommand(ApplyMedianFiltre);
+        //        return _applyMedianFiltre;
+        //    }
+        //}
+
+        //private void ApplyMedianFiltre(object parameter)
+        //{
+
+        //}
+
+        #endregion
+
+        #endregion
+
+        #region Thresholding
+        #endregion
+
+        #region Filters
+        #endregion
+
+        #region Morphological operations
+        #endregion
+
+        #region Geometric transformations
+        #endregion
+
+        #region Segmentation
+        #endregion
+
+        #region Use processed image as initial image
+        private ICommand _useProcessedImageAsInitialImageCommand;
+        public ICommand UseProcessedImageAsInitialImageCommand
+        {
+            get
+            {
+                if (_useProcessedImageAsInitialImageCommand == null)
+                    _useProcessedImageAsInitialImageCommand = new RelayCommand(UseProcessedImageAsInitialImage);
+                return _useProcessedImageAsInitialImageCommand;
+            }
+        }
+
+        private void UseProcessedImageAsInitialImage(object parameter)
+        {
+            if (ProcessedImage == null)
+            {
+                MessageBox.Show("Please process an image first!");
+                return;
+            }
+
+            var canvases = (object[])parameter;
+
+            ClearInitialCanvas(canvases[0] as Canvas);
+
+            if (GrayProcessedImage != null)
+            {
+                GrayInitialImage = GrayProcessedImage;
+                InitialImage = Convert(GrayInitialImage);
+            }
+            else if (ColorProcessedImage != null)
+            {
+                ColorInitialImage = ColorProcessedImage;
+                InitialImage = Convert(ColorInitialImage);
+            }
+
+            ClearProcessedCanvas(canvases[1] as Canvas);
+        }
+        #endregion
+
+      
 
     }
 }
