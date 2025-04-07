@@ -229,11 +229,7 @@ Foreground="{Binding Path=Theme.MenuItemForegroundColor}">
                       Background="{Binding Path=Theme.MenuItemBackgroundColor}"
                       Foreground="{Binding Path=Theme.MenuItemForegroundColor}">
 
-                <MenuItem Header="Filtru Median"
-                          Foreground="#1E1E1E"
-                          
-                          
-                          />
+               
 
             </MenuItem>
 
@@ -248,12 +244,21 @@ Foreground="{Binding Path=Theme.MenuItemForegroundColor}">
                       Foreground="{Binding Path=Theme.MenuItemForegroundColor}">
                 <MenuItem Header="Low-pass"
                           Foreground="#1E1E1E">
-
+                    
+                    
+                    <MenuItem Header="Filtru Median"
+                         Foreground="#1E1E1E"
+                         Command="{Binding Path=MenuCommands.ApplyMedianFiltre}"
+                         CommandParameter="{Binding ElementName=processedImageCanvas}"
+                         />
+                    
                 </MenuItem>
                 <MenuItem Header="High-pass"
                           Foreground="#1E1E1E">
 
                 </MenuItem>
+                
+                
             </MenuItem>
 
             <MenuItem Header="Morphological operations"

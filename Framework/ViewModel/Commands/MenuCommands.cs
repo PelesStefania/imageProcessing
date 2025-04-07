@@ -1075,24 +1075,7 @@ namespace Framework.ViewModel
 
         #endregion
 
-        #region Filtru median
-        //private RelayCommand _applyMedianFiltre;
-        //public RelayCommand ApplyMedianFiltre
-        //{
-        //    get
-        //    {
-        //        if (_applyMedianFiltre == null)
-        //            _applyMedianFiltre = new RelayCommand(ApplyMedianFiltre);
-        //        return _applyMedianFiltre;
-        //    }
-        //}
 
-        //private void ApplyMedianFiltre(object parameter)
-        //{
-
-        //}
-
-        #endregion
 
         #endregion
 
@@ -1100,6 +1083,72 @@ namespace Framework.ViewModel
         #endregion
 
         #region Filters
+
+        #region Filtru median
+        private RelayCommand _applyMedianFiltre;
+        public RelayCommand ApplyMedianFiltre
+        {
+            get
+            {
+                if (_applyMedianFiltre == null)
+                    _applyMedianFiltre = new RelayCommand(ApplyMedian);
+                return _applyMedianFiltre;
+            }
+        }
+
+        private void ApplyMedian(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+            ClearProcessedCanvas(parameter);
+            int radius;
+            List<string> labels = new List<string> {
+                        "Enter radius: ",
+                    };
+            DialogWindow window = new DialogWindow(_mainVM, labels);
+            window.ShowDialog();
+            List<double> values = window.GetValues();
+            if (values.Count < 1 || values[0] <= 0)
+            {
+                MessageBox.Show("Invalid input value!");
+                return;
+            }
+            radius = (int)values[0];
+
+            if (ColorInitialImage != null)
+            {
+                //ColorProcessedImage = Filters.MedianFilter(ColorInitialImage, radius);
+                //ProcessedImage = Convert(ColorProcessedImage);
+            }
+            else if (GrayInitialImage != null)
+            {
+               
+                   // Stopwatch sw = Stopwatch.StartNew();
+                    GrayProcessedImage = Filters.MedianFilter(GrayInitialImage, radius);
+                    ProcessedImage = Convert(GrayProcessedImage);
+                   // sw.Stop();
+                   // MessageBox.Show($"My Median (Gray): {sw.ElapsedMilliseconds} ms");
+
+                   // Stopwatch sw1 = Stopwatch.StartNew();
+                    //Image<Gray, byte> medianBlurredImage = new Image<Gray, byte>(GrayInitialImage.Width, GrayInitialImage.Height);
+                   // CvInvoke.MedianBlur(GrayInitialImage, medianBlurredImage, radius * 2 + 1);
+                    //sw1.Stop();
+                   // MessageBox.Show($"OpenCV MedianBlur (Gray): {sw1.ElapsedMilliseconds} ms");
+
+                   // CvInvoke.Imshow("My Median", GrayProcessedImage);
+                   // CvInvoke.Imshow("MedianBlur", medianBlurredImage);
+                
+            }
+
+
+
+        }
+
+        #endregion
+
         #endregion
 
         #region Morphological operations
