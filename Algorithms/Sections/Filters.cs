@@ -1,6 +1,8 @@
 ﻿using Emgu.CV.Structure;
 using Emgu.CV;
 using System;
+using System.Threading.Tasks;
+using Emgu.CV.Util;
 
 namespace Algorithms.Sections
 {
@@ -63,8 +65,7 @@ namespace Algorithms.Sections
 
             return histograms;
         }
-        //deci trebuie sa folosesc o structura de date care imi retine kernelul sortat
-        //pot face si o forma de cautare binara
+       
         private static void KernelHistogram(int[] kernelHistogram, int[][] columnHistograms, int radius, int width)
         {
             Array.Clear(kernelHistogram, 0, 256);
@@ -108,7 +109,7 @@ namespace Algorithms.Sections
         private static byte FindMedian(int[] histogram, int totalCount)
         {
             int count = 0;
-            int threshold = totalCount / 2;
+            int threshold = (totalCount / 2)+1;
 
             for (int i = 0; i < 256; i++)
             {
@@ -120,6 +121,28 @@ namespace Algorithms.Sections
             return 0; 
         }
 
+        public static Image<Bgr, byte> MedianFilter(Image<Bgr, byte> inputImage, int radius)
+        {
+            
+            Image<Gray, byte>[] channels = inputImage.Split();
+
+         
+            Image<Gray, byte> blueFiltered = MedianFilter(channels[0], radius);
+            Image<Gray, byte> greenFiltered = MedianFilter(channels[1], radius);
+            Image<Gray, byte> redFiltered = MedianFilter(channels[2], radius);
+
+            
+            Mat merged = new Mat();
+            CvInvoke.Merge(new VectorOfMat(blueFiltered.Mat, greenFiltered.Mat, redFiltered.Mat), merged);
+
+           
+            return merged.ToImage<Bgr, byte>();
+        }
+
+
         #endregion
     }
 }
+
+
+

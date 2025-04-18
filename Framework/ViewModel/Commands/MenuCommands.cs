@@ -16,6 +16,7 @@ using static Framework.Utilities.DrawingHelper;
 using static Framework.Utilities.FileHelper;
 using static Framework.Converters.ImageConverter;
 
+
 using Algorithms.Sections;
 using Algorithms.Tools;
 using Algorithms.Utilities;
@@ -1120,27 +1121,27 @@ namespace Framework.ViewModel
 
             if (ColorInitialImage != null)
             {
-                //ColorProcessedImage = Filters.MedianFilter(ColorInitialImage, radius);
-                //ProcessedImage = Convert(ColorProcessedImage);
+                ColorProcessedImage = Filters.MedianFilter(ColorInitialImage, radius);
+                ProcessedImage = Convert(ColorProcessedImage);
             }
             else if (GrayInitialImage != null)
             {
-               
-                   // Stopwatch sw = Stopwatch.StartNew();
-                    GrayProcessedImage = Filters.MedianFilter(GrayInitialImage, radius);
+
+                Stopwatch sw = Stopwatch.StartNew();
+                GrayProcessedImage = Filters.MedianFilter(GrayInitialImage, radius);
                     ProcessedImage = Convert(GrayProcessedImage);
-                   // sw.Stop();
-                   // MessageBox.Show($"My Median (Gray): {sw.ElapsedMilliseconds} ms");
+                sw.Stop();
+                MessageBox.Show($"My Median (Gray): {sw.ElapsedMilliseconds} ms");
 
-                   // Stopwatch sw1 = Stopwatch.StartNew();
-                    //Image<Gray, byte> medianBlurredImage = new Image<Gray, byte>(GrayInitialImage.Width, GrayInitialImage.Height);
-                   // CvInvoke.MedianBlur(GrayInitialImage, medianBlurredImage, radius * 2 + 1);
-                    //sw1.Stop();
-                   // MessageBox.Show($"OpenCV MedianBlur (Gray): {sw1.ElapsedMilliseconds} ms");
+                Stopwatch sw1 = Stopwatch.StartNew();
+                Image<Gray, byte> medianBlurredImage = new Image<Gray, byte>(GrayInitialImage.Width, GrayInitialImage.Height);
+                CvInvoke.MedianBlur(GrayInitialImage, medianBlurredImage, radius * 2 + 1);
+                sw1.Stop();
+                MessageBox.Show($"OpenCV MedianBlur (Gray): {sw1.ElapsedMilliseconds} ms");
 
-                   // CvInvoke.Imshow("My Median", GrayProcessedImage);
-                   // CvInvoke.Imshow("MedianBlur", medianBlurredImage);
-                
+                CvInvoke.Imshow("My Median", GrayProcessedImage);
+                CvInvoke.Imshow("MedianBlur", medianBlurredImage);
+
             }
 
 
@@ -1152,6 +1153,63 @@ namespace Framework.ViewModel
         #endregion
 
         #region Morphological operations
+
+        #region Apply Closing (Gray)
+        private RelayCommand _applyClosingCommand;
+        public RelayCommand ApplyClosingCommand
+        {
+            get
+            {
+                if (_applyClosingCommand == null)
+                    _applyClosingCommand = new RelayCommand(ApplyClosing);
+                return _applyClosingCommand;
+            }
+        }
+
+        private void ApplyClosing(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+
+            ClearProcessedCanvas(parameter);
+
+            if (GrayInitialImage == null)
+            {
+                MessageBox.Show("Only gray images can be processed for closing operation.");
+                return;
+            }
+
+            List<string> labels = new List<string> {
+                "   Enter structuring element size (odd number ≥ 3): "
+                };
+            DialogWindow window = new DialogWindow(_mainVM, labels);
+            window.ShowDialog();
+            List<double> values = window.GetValues();
+            if (values.Count < 1)
+            {
+                MessageBox.Show("No value provided.");
+                return;
+            }
+
+            int size = (int)values[0];
+
+            if (size < 3 || size % 2 == 0)
+            {
+                MessageBox.Show("Invalid size! Please enter an odd number ≥ 3.");
+                return;
+            }
+
+           
+            var dilated = MorphologicalOperations.Dilation(GrayInitialImage, size);
+            GrayProcessedImage = MorphologicalOperations.Erosion(dilated, size);
+
+            ProcessedImage = Convert(GrayProcessedImage);
+        }
+        #endregion
+
         #endregion
 
         #region Geometric transformations
