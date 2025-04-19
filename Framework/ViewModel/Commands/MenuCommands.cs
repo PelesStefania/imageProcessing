@@ -1213,6 +1213,66 @@ namespace Framework.ViewModel
         #endregion
 
         #region Geometric transformations
+
+        #region Apply Scaling
+        private RelayCommand _applyScalingCommand;
+        public RelayCommand ApplyScalingCommand
+        {
+            get
+            {
+                if (_applyScalingCommand == null)
+                    _applyScalingCommand = new RelayCommand(ApplyScaling);
+                return _applyScalingCommand;
+            }
+        }
+
+        private void ApplyScaling(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+
+            ClearProcessedCanvas(parameter);
+
+            List<string> labels = new List<string> {
+                "   Enter scaling coefficient: "
+                };
+            DialogWindow window = new DialogWindow(_mainVM, labels);
+            window.ShowDialog();
+            List<double> values = window.GetValues();
+            if (values.Count < 1)
+            {
+                MessageBox.Show("No value provided.");
+                return;
+            }
+
+            double coefficient = values[0];
+
+            if (coefficient<0)
+            {
+                MessageBox.Show("Invalid coefficient!");
+                return;
+            }
+
+            if (GrayInitialImage != null)
+            {
+                GrayProcessedImage = GeometricTransformations.Scaling(GrayInitialImage,coefficient);
+                ProcessedImage = Convert(GrayProcessedImage);
+            }
+            else if (ColorInitialImage != null)
+            {
+                ColorProcessedImage = GeometricTransformations.Scaling(ColorInitialImage, coefficient);
+                ProcessedImage = Convert(ColorProcessedImage);
+            }
+
+        }
+
+
+        #endregion
+
+
         #endregion
 
         #region Segmentation
